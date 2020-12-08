@@ -3,10 +3,10 @@ const bodyParser = require('body-parser');
 const cors = require('cors');
 
 // Importing routers
-const typeRoutes = require('./routes/type');
-const authorRoutes = require('./routes/author');
+// const typeRoutes = require('./routes/type');
+// const authorRoutes = require('./routes/author');
 const indexRoutes = require('./routes/user');
-const bookRoutes = require('./routes/book');
+// const bookRoutes = require('./routes/book');
 
 // App config
 const app = express();
@@ -15,9 +15,9 @@ app.use(cors());
 
 // Routes Config:
 app.use('/user', indexRoutes);
-app.use('/type', typeRoutes);
-app.use('/author', authorRoutes);
-app.use('/book', bookRoutes);
+// app.use('/type', typeRoutes);
+// app.use('/author', authorRoutes);
+// app.use('/book', bookRoutes);
 
 process.env.PORT = 8080;
 
