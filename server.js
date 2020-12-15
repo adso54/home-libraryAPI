@@ -6,7 +6,7 @@ const cors = require('cors');
 // const typeRoutes = require('./routes/type');
 // const authorRoutes = require('./routes/author');
 const indexRoutes = require('./routes/user');
-// const bookRoutes = require('./routes/book');
+const bookRoutes = require('./routes/book');
 
 // App config
 const app = express();
@@ -17,7 +17,7 @@ app.use(cors());
 app.use('/user', indexRoutes);
 // app.use('/type', typeRoutes);
 // app.use('/author', authorRoutes);
-// app.use('/book', bookRoutes);
+app.use('/book', bookRoutes);
 
 process.env.PORT = 8080;
 

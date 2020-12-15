@@ -40,7 +40,7 @@ const register = (params) =>{
 const signIn = (params) => {
     return new Promise((resolve, reject) => {
         const {password, email} = params;
-        db.select('user.*',  'login.password')
+        db.select('user.*',  'user_login.password')
             .from('user')
             .innerJoin('user_login','user.id','user_login.user_id')
             .where('user.email', '=', email)
