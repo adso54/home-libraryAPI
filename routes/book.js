@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router({mergeParams: true});
 // const { dbType} = require('../dbUtils/type');
 const { dbBook}= require('../dbUtils/book');
-const multer = require('multer')
+// const multer = require('multer')
 
 router.post('/', (req, res) => {
    dbBook.addBook(req.body)
@@ -17,27 +17,40 @@ router.get('/', (req, res) => {
 })
 
 
-var storage = multer.diskStorage({
-   destination: function (req, file, cb) {
-   cb(null, 'public/images')
- },
- filename: function (req, file, cb) {
-   cb(null, Date.now() + '-' +file.originalname )
- }
-})
-var upload = multer({ storage: storage }).single('file')
+// var storage = multer.diskStorage({
+//    destination: function (req, file, cb) {
+//    cb(null, 'public/images')
+//  },
+//  filename: function (req, file, cb) {
+//    cb(null, Date.now() + '-' +file.originalname )
+//  }
+// })
+// var upload = multer({ storage: storage }).single('file')
+
+// router.post('/upload',(req, res) => {
+//    upload(req, res, (err) =>{
+//           if (err instanceof multer.MulterError) {
+//               return res.status(500).json(err)
+//           } else if (err) {
+//               return res.status(500).json(err)
+//           }
+//      return res.status(200).send(req.file)
+
+//    })
+
+// });
 
 router.post('/upload',(req, res) => {
-   upload(req, res, (err) =>{
-          if (err instanceof multer.MulterError) {
-              return res.status(500).json(err)
-          } else if (err) {
-              return res.status(500).json(err)
-          }
-     return res.status(200).send(req.file)
-
+   console.log('start')
+   dbBook.uploadImage(req, res)
+   .then(image => {
+      res.status(200).send(image)
+      console.log('ok')})
+   .catch(err => {
+      res.status(500).send(err)
+      console.log(err)
    })
-
+   
 });
 
 module.exports = router;

@@ -1,4 +1,5 @@
 const { db } = require('./config');
+const multer = require('multer')
 
 const addBook = (params) =>{
     return new Promise((resolve, reject) =>{
@@ -19,13 +20,32 @@ const addBook = (params) =>{
     })
 }
 
-// const upload = (params) => {
-//     return new Promise((resolve, reject) => {
+const uploadImage = (req, res) => {
+    return new Promise((resolve, reject) => {
+        const storage = multer.diskStorage({
+            destination:  (req, file, cb) => {
+                cb(null, 'public/images')
+            },
+            filename: (req, file, cb) => {
+                cb(null, Date.now() + '-' +file.originalname )
+            }
+        })
 
-//     })
-// }
+        const upload = multer({ storage: storage }).single('file')
 
-const getBook =(params) => {
+         upload(req, res,  (err) =>{
+            if (err instanceof multer.MulterError) {
+                reject(err) 
+            } else if (err) {
+                reject(err)
+            }
+            resolve(req.file)
+     })
+
+    })
+}
+
+const getBook =() => {
     return new Promise((resolve, reject) => {
         db.select('*')
             .from('book')
@@ -49,6 +69,7 @@ const getBook =(params) => {
 
 module.exports = {dbBook:{
     addBook: addBook,
-    getBook: getBook
+    getBook: getBook,
+    uploadImage: uploadImage,
     // getAllBooks: getAllBooks
 }}
