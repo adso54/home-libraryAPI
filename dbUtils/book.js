@@ -30,7 +30,6 @@ const uploadImage = (req, res) => {
                 cb(null, Date.now() + '-' +file.originalname )
             }
         })
-
         const upload = multer({ storage: storage }).single('file')
 
          upload(req, res,  (err) =>{

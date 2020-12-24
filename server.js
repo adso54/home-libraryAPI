@@ -12,6 +12,7 @@ const bookRoutes = require('./routes/book');
 const app = express();
 app.use(bodyParser.json());
 app.use(cors());
+app.use(express.static('public'));
 
 // Routes Config:
 app.use('/user', indexRoutes);
@@ -24,3 +25,4 @@ process.env.PORT = 8080;
 app.listen(process.env.PORT || 8080, () =>{
     console.log(`Listen on port: ${(process.env.PORT) ? process.env.PORT : '8080'} `);
 })
+
