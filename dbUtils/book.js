@@ -3,7 +3,7 @@ const multer = require('multer')
 
 const addBook = (params) =>{
     return new Promise((resolve, reject) =>{
-        const { createDate = new Date(), title, description, image} = params;
+        const { createDate = new Date(), title, description, image, fileURL} = params;
         console.log(image)
 
         db('book')
@@ -12,7 +12,8 @@ const addBook = (params) =>{
             // create_user: createUser,
             title: title,
             // description: description,
-            image: image
+            // image: image
+            image_url: fileURL
         })
         .returning('id')
         .then(createdBook => {resolve(createdBook[0])})
@@ -33,13 +34,55 @@ const uploadImage = (req, res) => {
         const upload = multer({ storage: storage }).single('file')
 
          upload(req, res,  (err) =>{
+            const authors= JSON.parse(req.body.authors);
+            const authorsId = [];
+            const title = req.body.title;
+            const createDate = new Date();
+        
             if (err instanceof multer.MulterError) {
                 reject(err) 
             } else if (err) {
                 reject(err)
             }
-            resolve(req.file)
-     })
+            req.file.fileURL = 'images/' + req.file.filename;
+            
+            db('book')
+            .insert({
+                create_date: createDate,
+                title: title,
+                image_url: req.file.fileURL
+            })
+            .returning('id')
+            .then(createdBook => {
+                const bookId = JSON.parse(createdBook[0]);
+
+                authors.forEach((author) => {
+                    db('author')
+                    .insert({
+                        name: author.name
+                    })
+                    .returning('id')
+                    .then(authorId => {
+                        authorId = JSON.parse(authorId);
+                        authorsId.push(authorId)
+
+                        db('book_author')
+                        .insert({
+                            book_id: bookId,
+                            author_id: authorId
+                        })
+                        .returning('book_id')
+                        .then(book_id => console.log(book_id))
+                        .catch(err => console.log(err))
+                    })
+                })
+                resolve(bookId);
+            })
+            .catch(err=>reject(err))
+          
+        })
+    
+       
 
     })
 }

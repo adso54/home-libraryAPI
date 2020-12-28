@@ -16,9 +16,8 @@ router.get('/', (req, res) => {
 
 router.post('/upload',(req, res) => {
    dbBook.uploadImage(req, res)
-   .then(image => {
-      image.path = 'images/'+ image.filename;
-      res.status(200).json(image.path)
+   .then(book => {
+      res.status(200).json(book)
    })
    .catch(err => {
       res.status(500).json(err)
