@@ -1,27 +1,7 @@
 const { db } = require('./config');
 const multer = require('multer')
 
-const addBook = (params) =>{
-    return new Promise((resolve, reject) =>{
-        const { createDate = new Date(), title, description, image, fileURL} = params;
-        console.log(image)
-
-        db('book')
-        .insert({
-            create_date: createDate,
-            // create_user: createUser,
-            title: title,
-            // description: description,
-            // image: image
-            image_url: fileURL
-        })
-        .returning('id')
-        .then(createdBook => {resolve(createdBook[0])})
-        .catch(err=>reject(err))
-    })
-}
-
-const uploadImage = (req, res) => {
+const addBook = (req, res) => {
     return new Promise((resolve, reject) => {
         const storage = multer.diskStorage({
             destination:  (req, file, cb) => {
@@ -35,8 +15,13 @@ const uploadImage = (req, res) => {
 
          upload(req, res,  (err) =>{
             const authors= JSON.parse(req.body.authors);
+            const categories = JSON.parse(req.body.categories);
             const authorsId = [];
             const title = req.body.title;
+            const userId = req.body.userId;
+            const description = req.body.description;
+            const comments = req.body.comments;
+            const readDate = req.body.readDate;
             const createDate = new Date();
         
             if (err instanceof multer.MulterError) {
@@ -50,7 +35,8 @@ const uploadImage = (req, res) => {
             .insert({
                 create_date: createDate,
                 title: title,
-                image_url: req.file.fileURL
+                image_url: req.file.fileURL,
+                description: description
             })
             .returning('id')
             .then(createdBook => {
@@ -76,14 +62,43 @@ const uploadImage = (req, res) => {
                         .catch(err => console.log(err))
                     })
                 })
+
+                categories.forEach((category) => {
+                    db('category')
+                    .insert({
+                        category: category
+                    })
+                    .returning('id')
+                    .then(categoryId => {
+                        categoryId = JSON.parse(categoryId);
+                        
+                        db('book_category')
+                        .insert({
+                            book_id: bookId,
+                            category_id: categoryId
+                        })
+                        .returning('book_id')
+                        .then(book_id => console.log(book_id))
+                        .catch(err => console.log(err))
+                    })
+                })
+
+                db('book_user')
+                .insert({
+                    book_id: bookId,
+                    user_id: userId,
+                    comments: comments,
+                    // read_date: readDate
+                })
+                .returning('book_id')
+                .then(book_id => console.log(book_id))
+                .catch(err => console.log(err))
+
                 resolve(bookId);
             })
             .catch(err=>reject(err))
           
         })
-    
-       
-
     })
 }
 
@@ -112,6 +127,4 @@ const getBook =() => {
 module.exports = {dbBook:{
     addBook: addBook,
     getBook: getBook,
-    uploadImage: uploadImage,
-    // getAllBooks: getAllBooks
 }}
