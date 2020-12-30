@@ -16,13 +16,21 @@ const addBook = (req, res) => {
          upload(req, res,  (err) =>{
             const authors= JSON.parse(req.body.authors);
             const categories = JSON.parse(req.body.categories);
-            const authorsId = [];
             const title = req.body.title;
             const userId = req.body.userId;
             const description = req.body.description;
             const comments = req.body.comments;
-            const readDate = req.body.readDate;
+            const readDate = new Date(req.body.readDate);
             const createDate = new Date();
+
+            const checkIfAuthorExist = async (author) =>{
+                const data = await db.select('id').from('author').where('name', '=', author.name);
+                if((typeof data[0] === 'undefined' || data[0] === null)){
+                    return null;
+                }else{
+                    return data[0].id;
+                }      
+            }
         
             if (err instanceof multer.MulterError) {
                 reject(err) 
@@ -43,25 +51,48 @@ const addBook = (req, res) => {
                 const bookId = JSON.parse(createdBook[0]);
 
                 authors.forEach((author) => {
-                    db('author')
-                    .insert({
-                        name: author.name
+                    checkIfAuthorExist(author).then(authorId => {
+                        if(authorId !== null){
+                            db('book_author')
+                                .insert({
+                                    book_id: bookId,
+                                    author_id: authorId
+                                })
+                                .returning('book_id')
+                                // .then(book_id => console.log(book_id))
+                                .catch(err => console.log(err))
+                        }else{
+                            db('author')
+                            .insert({
+                                name: author.name
+                            })
+                            .returning('id')
+                            .then(authorId => {
+                                authorId = JSON.parse(authorId);
+                                db('book_author')
+                                .insert({
+                                    book_id: bookId,
+                                    author_id: authorId
+                                })
+                                .returning('book_id')
+                                // .then(book_id => console.log(book_id))
+                                .catch(err => console.log(err))
+                            })
+                        }
+                    
                     })
-                    .returning('id')
-                    .then(authorId => {
-                        authorId = JSON.parse(authorId);
-                        authorsId.push(authorId)
-
-                        db('book_author')
-                        .insert({
-                            book_id: bookId,
-                            author_id: authorId
-                        })
-                        .returning('book_id')
-                        .then(book_id => console.log(book_id))
-                        .catch(err => console.log(err))
-                    })
+                    
                 })
+
+                
+
+                const insertAuthor = (author) => {
+
+                }
+
+                const insertAuthorBook = (authorId, bookId) => {
+
+                }
 
                 categories.forEach((category) => {
                     db('category')
@@ -78,7 +109,7 @@ const addBook = (req, res) => {
                             category_id: categoryId
                         })
                         .returning('book_id')
-                        .then(book_id => console.log(book_id))
+                        // .then(book_id => console.log(book_id))
                         .catch(err => console.log(err))
                     })
                 })
@@ -88,10 +119,10 @@ const addBook = (req, res) => {
                     book_id: bookId,
                     user_id: userId,
                     comments: comments,
-                    // read_date: readDate
+                    read_date: readDate
                 })
                 .returning('book_id')
-                .then(book_id => console.log(book_id))
+                // .then(book_id => console.log(book_id))
                 .catch(err => console.log(err))
 
                 resolve(bookId);
@@ -117,7 +148,6 @@ const getBook =() => {
                 binary += String.fromCharCode( bytes[ i ] );
             }
             book[0].image= binary;
-            console.log(book)
             resolve(book)
         })
         .catch(err=>reject(err))
