@@ -123,7 +123,6 @@ const addBook = (req, res) => {
                             })
                         }
                     })
-                   
                 })
 
                 db('book_user')
@@ -165,6 +164,8 @@ const getBook =() => {
         .catch(err=>reject(err))
     })
 }
+
+
 
 module.exports = {dbBook:{
     addBook: addBook,
