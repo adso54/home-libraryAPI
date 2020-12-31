@@ -31,6 +31,45 @@ const addBook = (req, res) => {
                     return data[0].id;
                 }      
             }
+
+            const checkIfCategoryExist = async (category) =>{
+                const data = await db.select('id').from('category').where('category', '=', category);
+                if((typeof data[0] === 'undefined' || data[0] === null)){
+                    return null;
+                }else{
+                    return data[0].id;
+                }      
+            }
+
+            const insertBookAuthor = async (bookId, authorId) => {
+                await db('book_author')
+                .insert({
+                    book_id: bookId,
+                    author_id: authorId
+                })
+                .returning('book_id')
+                .then(book_id => {return book_id})
+                .catch(err => {
+                    console.log(err)
+                    return err
+                })
+            }
+
+            const insertBookCategory = async (bookId, categoryId) => {
+                await  db('book_category')
+                .insert({
+                    book_id: bookId,
+                    category_id: categoryId
+                })
+                .returning('book_id')
+                .then(bookId => {
+                    return bookId
+                })
+                .catch(err => {
+                    console.log(err)
+                    return err
+                })
+            }
         
             if (err instanceof multer.MulterError) {
                 reject(err) 
@@ -53,14 +92,7 @@ const addBook = (req, res) => {
                 authors.forEach((author) => {
                     checkIfAuthorExist(author).then(authorId => {
                         if(authorId !== null){
-                            db('book_author')
-                                .insert({
-                                    book_id: bookId,
-                                    author_id: authorId
-                                })
-                                .returning('book_id')
-                                // .then(book_id => console.log(book_id))
-                                .catch(err => console.log(err))
+                            insertBookAuthor(bookId, authorId);
                         }else{
                             db('author')
                             .insert({
@@ -69,49 +101,29 @@ const addBook = (req, res) => {
                             .returning('id')
                             .then(authorId => {
                                 authorId = JSON.parse(authorId);
-                                db('book_author')
-                                .insert({
-                                    book_id: bookId,
-                                    author_id: authorId
-                                })
-                                .returning('book_id')
-                                // .then(book_id => console.log(book_id))
-                                .catch(err => console.log(err))
+                                insertBookAuthor(bookId, authorId);
                             })
                         }
-                    
-                    })
-                    
+                    }) 
                 })
 
-                
-
-                const insertAuthor = (author) => {
-
-                }
-
-                const insertAuthorBook = (authorId, bookId) => {
-
-                }
-
                 categories.forEach((category) => {
-                    db('category')
-                    .insert({
-                        category: category
+                    checkIfCategoryExist(category).then(categoryId => {
+                        if(categoryId !== null){
+                            insertBookCategory(bookId, categoryId)
+                        }else{
+                            db('category')
+                            .insert({
+                                category: category
+                            })
+                            .returning('id')
+                            .then(categoryId => {
+                                categoryId = JSON.parse(categoryId);
+                                insertBookCategory(bookId, categoryId)
+                            })
+                        }
                     })
-                    .returning('id')
-                    .then(categoryId => {
-                        categoryId = JSON.parse(categoryId);
-                        
-                        db('book_category')
-                        .insert({
-                            book_id: bookId,
-                            category_id: categoryId
-                        })
-                        .returning('book_id')
-                        // .then(book_id => console.log(book_id))
-                        .catch(err => console.log(err))
-                    })
+                   
                 })
 
                 db('book_user')
