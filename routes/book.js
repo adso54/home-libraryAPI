@@ -12,11 +12,12 @@ router.post('/', (req, res) => {
    })
 })
 
-router.get('/', (req, res) => {
-   dbBook.getBook()
-   .then((book) => res.json(book))
+router.post('/allUserBooks', (req, res) => {
+   dbBook.getAllUserBooks(req.body.userId)
+   .then((books) => res.json(books))
    .catch((err) =>res.json(err))
 })
+
 
 module.exports = router;
 

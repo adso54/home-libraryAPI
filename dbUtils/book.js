@@ -150,8 +150,6 @@ const getBook =() => {
             .from('book')
             .where('id', '=', '14')
         .then(book => {
-            console.log(book[0].image)
-
             var binary = '';
             var bytes = new Uint8Array(book[0].image);
             var len = bytes.byteLength;
@@ -165,9 +163,27 @@ const getBook =() => {
     })
 }
 
-
+const getAllUserBooks = (userId) => {
+    return new Promise((resolve, reject) => {
+        db.select('book.id', 'book.title', 'book.image_url', 'book.description' 
+        ,'book_user.comments', 'book_user.read_date'
+        ,'author.name'
+        )
+            .from('book')
+            .innerJoin('book_user', 'book.id', 'book_user.book_id')
+            .innerJoin('book_author', 'book.id', 'book_author.book_id')
+            .innerJoin('author', 'book_author.author_id', 'author.id')
+            .innerJoin('book_category','book.id','book_category.book_id')
+            .where('book_user.user_id','=',userId)
+        .then(books => {
+            resolve(books)
+        })
+        .catch(err => reject(err))
+    })
+}
 
 module.exports = {dbBook:{
     addBook: addBook,
     getBook: getBook,
+    getAllUserBooks: getAllUserBooks
 }}
