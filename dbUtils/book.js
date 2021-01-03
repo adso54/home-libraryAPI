@@ -167,17 +167,56 @@ const getAllUserBooks = (userId) => {
     return new Promise((resolve, reject) => {
         db.select('book.id', 'book.title', 'book.image_url', 'book.description' 
         ,'book_user.comments', 'book_user.read_date'
-        ,'author.name'
         )
             .from('book')
             .innerJoin('book_user', 'book.id', 'book_user.book_id')
-            .innerJoin('book_author', 'book.id', 'book_author.book_id')
-            .innerJoin('author', 'book_author.author_id', 'author.id')
-            .innerJoin('book_category','book.id','book_category.book_id')
+            // .innerJoin('book_author', 'book.id', 'book_author.book_id')
+            // .innerJoin('author', 'book_author.author_id', 'author.id')
+            // .innerJoin('book_category','book.id','book_category.book_id')
             .where('book_user.user_id','=',userId)
         .then(books => {
-            resolve(books)
-        })
+                // let fullBooks = async () =>  {
+                //     return books.map(book =>{
+                //         return db.select('author.name')
+                //             .from('author')
+                //             .innerJoin('book_author', 'author.id','book_author.author_id')
+                //             .where('book_author.book_id','=',book.id)
+                //         .then(authors =>{
+                //             return { ...book, author: authors}
+                //         })
+                //     })
+                // }
+                // console.log(fullBooks)
+                // resolve(books)  
+
+                const functionWithPromise = book => {
+                    return Promise.resolve(
+                        db.select('author.name')
+                            .from('author')
+                            .innerJoin('book_author', 'author.id','book_author.author_id')
+                            .where('book_author.book_id','=',book.id)
+                        .then(authors =>{
+                            return { ...book, author: authors}
+                        })
+                    )
+                }
+
+                const asAsyncFunction = async book => {
+                    return functionWithPromise(book)
+                }
+
+                const getData = async() => {
+                    return Promise.all(books.map(book => asAsyncFunction(book)))
+                }
+
+                resolve(
+                    getData().then(books => {
+                        console.log(books[0].author)
+                        return books
+                    })
+                )
+
+            })
         .catch(err => reject(err))
     })
 }
