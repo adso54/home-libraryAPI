@@ -144,23 +144,72 @@ const addBook = (req, res) => {
     })
 }
 
-const getBook =() => {
-    return new Promise((resolve, reject) => {
-        db.select('*')
+const getBook =(userId, bookId) => {
+    db.select('book.id', 'book.title', 'book.image_url', 'book.description' 
+        ,'book_user.comments', 'book_user.read_date'
+        )
             .from('book')
-            .where('id', '=', '14')
-        .then(book => {
-            var binary = '';
-            var bytes = new Uint8Array(book[0].image);
-            var len = bytes.byteLength;
-            for (var i = 0; i < len; i++) {
-                binary += String.fromCharCode( bytes[ i ] );
+            .innerJoin('book_user', 'book.id', 'book_user.book_id')
+            .where('book_user.user_id' , '=' , userId)
+            .andWhere('book.id' , '=' , bookId)
+        .then(books => {
+            //Getting authors
+            const functionWithPromise = book => {
+                return Promise.resolve(
+                    db.select('author.name')
+                        .from('author')
+                        .innerJoin('book_author', 'author.id','book_author.author_id')
+                        .where('book_author.book_id','=',book.id)
+                    .then(authors =>{
+                        return { ...book, author: authors}
+                    })
+                )
             }
-            book[0].image= binary;
-            resolve(book)
+
+            const asAsyncFunction = async book => {
+                return functionWithPromise(book)
+            }
+
+            const getData = async() => {
+                return Promise.all(books.map(book => asAsyncFunction(book)))
+            }
+
+            return(
+                getData().then(books => {
+                    return books
+                })
+            )
+
         })
-        .catch(err=>reject(err))
-    })
+        .then(books => {
+            //Getting categories
+            const functionWithPromise = book => {
+                return Promise.resolve(
+                    db.select('category.category')
+                        .from('category')
+                        .innerJoin('book_category', 'category.id','book_category.category_id')
+                        .where('book_category.book_id','=',book.id)
+                    .then(category =>{
+                        return { ...book, category: category}
+                    })
+                )
+            }
+
+            const asAsyncFunction = async book => {
+                return functionWithPromise(book)
+            }
+
+            const getData = async() => {
+                return Promise.all(books.map(book => asAsyncFunction(book)))
+            }
+
+            resolve(
+                getData().then(books => {
+                    return books
+                })
+            )
+        })
+        .catch(err => reject(err))
 }
 
 const getAllUserBooks = (userId) => {
@@ -170,53 +219,64 @@ const getAllUserBooks = (userId) => {
         )
             .from('book')
             .innerJoin('book_user', 'book.id', 'book_user.book_id')
-            // .innerJoin('book_author', 'book.id', 'book_author.book_id')
-            // .innerJoin('author', 'book_author.author_id', 'author.id')
-            // .innerJoin('book_category','book.id','book_category.book_id')
             .where('book_user.user_id','=',userId)
         .then(books => {
-                // let fullBooks = async () =>  {
-                //     return books.map(book =>{
-                //         return db.select('author.name')
-                //             .from('author')
-                //             .innerJoin('book_author', 'author.id','book_author.author_id')
-                //             .where('book_author.book_id','=',book.id)
-                //         .then(authors =>{
-                //             return { ...book, author: authors}
-                //         })
-                //     })
-                // }
-                // console.log(fullBooks)
-                // resolve(books)  
-
-                const functionWithPromise = book => {
-                    return Promise.resolve(
-                        db.select('author.name')
-                            .from('author')
-                            .innerJoin('book_author', 'author.id','book_author.author_id')
-                            .where('book_author.book_id','=',book.id)
-                        .then(authors =>{
-                            return { ...book, author: authors}
-                        })
-                    )
-                }
-
-                const asAsyncFunction = async book => {
-                    return functionWithPromise(book)
-                }
-
-                const getData = async() => {
-                    return Promise.all(books.map(book => asAsyncFunction(book)))
-                }
-
-                resolve(
-                    getData().then(books => {
-                        console.log(books[0].author)
-                        return books
+            //Getting authors
+            const functionWithPromise = book => {
+                return Promise.resolve(
+                    db.select('author.name')
+                        .from('author')
+                        .innerJoin('book_author', 'author.id','book_author.author_id')
+                        .where('book_author.book_id','=',book.id)
+                    .then(authors =>{
+                        return { ...book, author: authors}
                     })
                 )
+            }
 
-            })
+            const asAsyncFunction = async book => {
+                return functionWithPromise(book)
+            }
+
+            const getData = async() => {
+                return Promise.all(books.map(book => asAsyncFunction(book)))
+            }
+
+            return(
+                getData().then(books => {
+                    return books
+                })
+            )
+
+        })
+        .then(books => {
+            //Getting categories
+            const functionWithPromise = book => {
+                return Promise.resolve(
+                    db.select('category.category')
+                        .from('category')
+                        .innerJoin('book_category', 'category.id','book_category.category_id')
+                        .where('book_category.book_id','=',book.id)
+                    .then(category =>{
+                        return { ...book, category: category}
+                    })
+                )
+            }
+
+            const asAsyncFunction = async book => {
+                return functionWithPromise(book)
+            }
+
+            const getData = async() => {
+                return Promise.all(books.map(book => asAsyncFunction(book)))
+            }
+
+            resolve(
+                getData().then(books => {
+                    return books
+                })
+            )
+        })
         .catch(err => reject(err))
     })
 }

@@ -18,6 +18,12 @@ router.post('/allUserBooks', (req, res) => {
    .catch((err) =>res.json(err))
 })
 
+router.post('/details/:bookId', (req, res) => {
+   dbBook.getBook(req.body.userId, req.params.bookId)
+   .then((books) => res.json(books))
+   .catch((err) =>res.json(err))
+})
+
 
 module.exports = router;
 
