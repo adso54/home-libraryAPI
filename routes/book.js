@@ -18,9 +18,11 @@ router.post('/allUserBooks', (req, res) => {
    .catch((err) =>res.json(err))
 })
 
-router.post('/details/:bookId', (req, res) => {
-   dbBook.getBook(req.body.userId, req.params.bookId)
-   .then((books) => res.json(books))
+router.post('/details', (req, res) => {
+   dbBook.getBook(req.body.userId, req.body.bookId)
+   .then((book) => {
+      res.json(book[0])
+   })
    .catch((err) =>res.json(err))
 })
 
