@@ -20,7 +20,13 @@ const addBook = (req, res) => {
             const userId = req.body.userId;
             const description = req.body.description;
             const comments = req.body.comments;
-            const readDate = new Date(req.body.readDate);
+            let readDate = null;
+            if(req.body.readDate!=='null'){
+                readDate = new Date(req.body.readDate);
+            }else{
+                readDate = null;
+            }
+            
             const createDate = new Date();
 
             const checkIfAuthorExist = async (author) =>{
@@ -124,19 +130,29 @@ const addBook = (req, res) => {
                         }
                     })
                 })
-
-                db('book_user')
-                .insert({
-                    book_id: bookId,
-                    user_id: userId,
-                    comments: comments,
-                    read_date: readDate
-                })
-                .returning('book_id')
-                // .then(book_id => console.log(book_id))
-                .catch(err => console.log(err))
-
-                resolve(bookId);
+                if(readDate!==null) {
+                    db('book_user')
+                    .insert({
+                        book_id: bookId,
+                        user_id: userId,
+                        comments: comments,
+                        read_date: readDate
+                    })
+                    .returning('book_id')
+                    .catch(err => console.log(err))
+    
+                    resolve(bookId);
+                }else{
+                    db('book_user')
+                    .insert({
+                        book_id: bookId,
+                        user_id: userId,
+                        comments: comments
+                    })
+                    .returning('book_id')
+                    .catch(err => console.log(err))
+                    resolve(bookId);
+                }
             })
             .catch(err=>reject(err))
           
