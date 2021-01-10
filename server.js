@@ -22,9 +22,9 @@ app.use('/user', indexRoutes);
 // app.use('/author', authorRoutes);
 app.use('/book', bookRoutes);
 
-process.env.PORT = 8080;
+const PORT = process.env.PORT || 8080;
 
-app.listen(process.env.PORT || 8080, () =>{
-    console.log(`Listen on port: ${(process.env.PORT) ? process.env.PORT : '8080'} `);
-})
+app.listen(PORT, () => {
+    console.log(`Our app is running on port ${ PORT }`);
+});
 
