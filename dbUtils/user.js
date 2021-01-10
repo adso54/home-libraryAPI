@@ -4,9 +4,6 @@ const bcrypt = require('bcrypt');
 const register = (params) =>{
     return new Promise((resolve, reject) =>{
 
-        db.raw('select 1+1 as result').catch(err => {
-            console.log(err);
-          });
         const { firstName, lastName, email, createDate = new Date(), password} = params;
         const salt = bcrypt.genSaltSync(10);
         const hash = bcrypt.hashSync(password, salt);
@@ -36,6 +33,7 @@ const register = (params) =>{
             .catch(trx.rollback)
         })
         .catch(err => {
+            console.log(err)
             reject(err)
         });
     }) 
@@ -63,7 +61,10 @@ const signIn = (params) => {
                 })
                 
             })   
-            .catch(err =>  reject(err)); 
+            .catch(err =>  {
+                console.log(err)
+                reject(err)
+            }); 
     })
     
 }
