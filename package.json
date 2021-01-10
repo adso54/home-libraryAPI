@@ -4,7 +4,8 @@
   "description": "API for BookRegister App",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "start:dev": "nodemon server.js"
   },
   "author": "Kamil Danielski",
   "license": "ISC",
