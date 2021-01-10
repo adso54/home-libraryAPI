@@ -18,7 +18,7 @@ app.use(express.static('public'));
 
 // Routes Config:
 app.use('/user', indexRoutes);
-// app.use('/type', typeRoutes);
+// app.use('/type', typeRoutes);d
 // app.use('/author', authorRoutes);
 app.use('/book', bookRoutes);
 
