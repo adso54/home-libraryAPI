@@ -16,7 +16,8 @@ router.post('/register', (req, res) => {
 
 router.post('/signIn', (req,res) => {
     dbUser.signIn(req.body)
-    .then(user=>res.json(user))
+    .then(user=>{
+        res.json(user)})
     .catch(err=>res.json(err))
 })
 
