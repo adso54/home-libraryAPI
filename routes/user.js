@@ -9,12 +9,16 @@ const {dbUser} = require('../dbUtils/user');
 // })
 
 router.post('/register', (req, res) => {
+    console.log(req.body)
     dbUser.register(req.body)
-    .then(createdUser => {res.json(createdUser)})
+    .then(createdUser => {
+        console.log(createdUser)
+        res.json(createdUser)})
     .catch(err=>res.json(err))
 })
 
 router.post('/signIn', (req,res) => {
+    console.log(req.body)
     dbUser.signIn(req.body)
     .then(user=>{
         res.json(user)})
