@@ -41,7 +41,6 @@ const register = (params) =>{
 
 const signIn = (params) => {
     return new Promise((resolve, reject) => {
-        console.log(db)
         const {password, email} = params;
         db.select('user.*',  'user_login.password')
             .from('user')

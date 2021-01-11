@@ -9,20 +9,17 @@ const {dbUser} = require('../dbUtils/user');
 // })
 
 router.post('/register', (req, res) => {
-    console.log(req.body)
     dbUser.register(req.body)
     .then(createdUser => {
-        console.log(createdUser)
-        res.json(createdUser)})
-    .catch(err=>res.json(err))
+        res.status(200).json(createdUser)})
+    .catch(err=>res.status(500).json(err))
 })
 
 router.post('/signIn', (req,res) => {
-    console.log(req.body)
     dbUser.signIn(req.body)
     .then(user=>{
-        res.json(user)})
-    .catch(err=>res.json(err))
+        res.status(200).json(user)})
+    .catch(err=>res.status(500).json(err))
 })
 
 // router.post('/addBookToUser', (req, res)=>{
