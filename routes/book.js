@@ -14,16 +14,16 @@ router.post('/', (req, res) => {
 
 router.post('/allUserBooks', (req, res) => {
    dbBook.getAllUserBooks(req.body.userId)
-   .then((books) => res.json(books))
-   .catch((err) =>res.json(err))
+   .then((books) => res.status(200).json(books))
+   .catch((err) =>res.status(500).json(err))
 })
 
 router.post('/details', (req, res) => {
    dbBook.getBook(req.body.userId, req.body.bookId)
    .then((book) => {
-      res.json(book[0])
+      res.status(200).json(book[0])
    })
-   .catch((err) =>res.json(err))
+   .catch((err) =>res.status(500).json(err))
 })
 
 
