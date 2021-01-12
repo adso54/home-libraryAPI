@@ -78,17 +78,23 @@ const addBook = (req, res) => {
             }
         
             if (err instanceof multer.MulterError) {
+                console.log(err)
                 reject(err) 
             } else if (err) {
+                console.log(err)
                 reject(err)
             }
-            req.file.fileURL = 'images/' + req.file.filename;
+            
+            let fileURL = null;
+            if(typeof req.file !== 'undefined' && typeof req.file.filename !== 'undefined'){
+                fileURL = 'images/' + req.file.filename;
+            }
             
             db('book')
             .insert({
                 create_date: createDate,
                 title: title,
-                image_url: req.file.fileURL,
+                image_url: fileURL,
                 description: description
             })
             .returning('id')
