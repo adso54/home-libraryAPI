@@ -1,168 +1,146 @@
 const { db } = require('./config');
 const multer = require('multer')
+const {uploadImageIntoStore } = require('./firebaseUtils')
 
 const addBook = (req, res) => {
     return new Promise((resolve, reject) => {
-        const storage = multer.diskStorage({
-            destination:  (req, file, cb) => {
-                cb(null, 'public/images')
-            },
-            filename: (req, file, cb) => {
-                cb(null, Date.now() + '-' +file.originalname )
-            }
-        })
-        const upload = multer({ storage: storage }).single('file')
-
-         upload(req, res,  (err) =>{
-            const authors= JSON.parse(req.body.authors);
-            const categories = JSON.parse(req.body.categories);
-            const title = req.body.title;
-            const userId = req.body.userId;
-            const description = req.body.description;
-            const comments = req.body.comments;
-            let readDate = null;
-            if(req.body.readDate!=='null'){
-                readDate = new Date(req.body.readDate);
-            }else{
-                readDate = null;
-            }
-            
-            const createDate = new Date();
-
-            const checkIfAuthorExist = async (author) =>{
-                const data = await db.select('id').from('author').where('name', '=', author.name);
-                if((typeof data[0] === 'undefined' || data[0] === null)){
-                    return null;
-                }else{
-                    return data[0].id;
-                }      
-            }
-
-            const checkIfCategoryExist = async (category) =>{
-                const data = await db.select('id').from('category').where('category', '=', category);
-                if((typeof data[0] === 'undefined' || data[0] === null)){
-                    return null;
-                }else{
-                    return data[0].id;
-                }      
-            }
-
-            const insertBookAuthor = async (bookId, authorId) => {
-                await db('book_author')
-                .insert({
-                    book_id: bookId,
-                    author_id: authorId
-                })
-                .returning('book_id')
-                .then(book_id => {return book_id})
-                .catch(err => {
-                    console.log(err)
-                    return err
-                })
-            }
-
-            const insertBookCategory = async (bookId, categoryId) => {
-                await  db('book_category')
-                .insert({
-                    book_id: bookId,
-                    category_id: categoryId
-                })
-                .returning('book_id')
-                .then(bookId => {
-                    return bookId
-                })
-                .catch(err => {
-                    console.log(err)
-                    return err
-                })
-            }
         
-            if (err instanceof multer.MulterError) {
-                console.log(err)
-                reject(err) 
-            } else if (err) {
-                console.log(err)
-                reject(err)
-            }
-            
-            let fileURL = null;
-            if(typeof req.file !== 'undefined' && typeof req.file.filename !== 'undefined'){
-                fileURL = 'images/' + req.file.filename;
-            }
-            
-            db('book')
+        const authors= JSON.parse(req.body.authors);
+        const categories = JSON.parse(req.body.categories);
+        const title = req.body.title;
+        const userId = req.body.userId;
+        const description = req.body.description;
+        const comments = req.body.comments;
+        const imageUrl = req.body.imageUrl;
+        
+        let readDate = null;
+        if(req.body.readDate!=='null'){
+            readDate = new Date(req.body.readDate);
+        }else{
+            readDate = null;
+        }
+        
+        const createDate = new Date();
+
+        const checkIfAuthorExist = async (author) =>{
+            const data = await db.select('id').from('author').where('name', '=', author.name);
+            if((typeof data[0] === 'undefined' || data[0] === null)){
+                return null;
+            }else{
+                return data[0].id;
+            }      
+        }
+
+        const checkIfCategoryExist = async (category) =>{
+            const data = await db.select('id').from('category').where('category', '=', category);
+            if((typeof data[0] === 'undefined' || data[0] === null)){
+                return null;
+            }else{
+                return data[0].id;
+            }      
+        }
+
+        const insertBookAuthor = async (bookId, authorId) => {
+            await db('book_author')
             .insert({
-                create_date: createDate,
-                title: title,
-                image_url: fileURL,
-                description: description
+                book_id: bookId,
+                author_id: authorId
             })
-            .returning('id')
-            .then(createdBook => {
-                const bookId = JSON.parse(createdBook[0]);
-
-                authors.forEach((author) => {
-                    checkIfAuthorExist(author).then(authorId => {
-                        if(authorId !== null){
-                            insertBookAuthor(bookId, authorId);
-                        }else{
-                            db('author')
-                            .insert({
-                                name: author.name
-                            })
-                            .returning('id')
-                            .then(authorId => {
-                                authorId = JSON.parse(authorId);
-                                insertBookAuthor(bookId, authorId);
-                            })
-                        }
-                    }) 
-                })
-
-                categories.forEach((category) => {
-                    checkIfCategoryExist(category).then(categoryId => {
-                        if(categoryId !== null){
-                            insertBookCategory(bookId, categoryId)
-                        }else{
-                            db('category')
-                            .insert({
-                                category: category
-                            })
-                            .returning('id')
-                            .then(categoryId => {
-                                categoryId = JSON.parse(categoryId);
-                                insertBookCategory(bookId, categoryId)
-                            })
-                        }
-                    })
-                })
-                if(readDate!==null) {
-                    db('book_user')
-                    .insert({
-                        book_id: bookId,
-                        user_id: userId,
-                        comments: comments,
-                        read_date: readDate
-                    })
-                    .returning('book_id')
-                    .catch(err => console.log(err))
-    
-                    resolve(bookId);
-                }else{
-                    db('book_user')
-                    .insert({
-                        book_id: bookId,
-                        user_id: userId,
-                        comments: comments
-                    })
-                    .returning('book_id')
-                    .catch(err => console.log(err))
-                    resolve(bookId);
-                }
+            .returning('book_id')
+            .then(book_id => {return book_id})
+            .catch(err => {
+                console.log(err)
+                return err
             })
-            .catch(err=>reject(err))
-          
+        }
+
+        const insertBookCategory = async (bookId, categoryId) => {
+            await  db('book_category')
+            .insert({
+                book_id: bookId,
+                category_id: categoryId
+            })
+            .returning('book_id')
+            .then(bookId => {
+                return bookId
+            })
+            .catch(err => {
+                console.log(err)
+                return err
+            })
+        }
+                            
+        db('book')
+        .insert({
+            create_date: createDate,
+            title: title,
+            image_url: imageUrl,
+            description: description
         })
+        .returning('id')
+        .then(createdBook => {
+            const bookId = JSON.parse(createdBook[0]);
+
+            authors.forEach((author) => {
+                checkIfAuthorExist(author).then(authorId => {
+                    if(authorId !== null){
+                        insertBookAuthor(bookId, authorId);
+                    }else{
+                        db('author')
+                        .insert({
+                            name: author.name
+                        })
+                        .returning('id')
+                        .then(authorId => {
+                            authorId = JSON.parse(authorId);
+                            insertBookAuthor(bookId, authorId);
+                        })
+                    }
+                }) 
+            })
+
+            categories.forEach((category) => {
+                checkIfCategoryExist(category).then(categoryId => {
+                    if(categoryId !== null){
+                        insertBookCategory(bookId, categoryId)
+                    }else{
+                        db('category')
+                        .insert({
+                            category: category
+                        })
+                        .returning('id')
+                        .then(categoryId => {
+                            categoryId = JSON.parse(categoryId);
+                            insertBookCategory(bookId, categoryId)
+                        })
+                    }
+                })
+            })
+            if(readDate!==null) {
+                db('book_user')
+                .insert({
+                    book_id: bookId,
+                    user_id: userId,
+                    comments: comments,
+                    read_date: readDate
+                })
+                .returning('book_id')
+                .catch(err => console.log(err))
+
+                resolve(bookId);
+            }else{
+                db('book_user')
+                .insert({
+                    book_id: bookId,
+                    user_id: userId,
+                    comments: comments
+                })
+                .returning('book_id')
+                .catch(err => console.log(err))
+                resolve(bookId);
+            }
+        })
+        .catch(err=>reject(err))
     })
 }
 

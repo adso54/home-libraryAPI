@@ -1,6 +1,7 @@
 const firebase = require('firebase')
 require('firebase/firestore')
 require('firebase/auth')
+require('firebase/storage');
 
 const config = {
     apiKey: process.env.FIREBASE_API_KEY,
@@ -14,5 +15,8 @@ const config = {
 
 firebase.initializeApp(config);
 
-export const firestore = firebase.firestore();
-export default firebase;
+
+module.exports = {
+  firestore: firebase.firestore(), 
+  firebase: firebase
+}
