@@ -3,10 +3,7 @@ const bodyParser = require('body-parser');
 const cors = require('cors');
 require('dotenv').config();
 
-
 // Importing routers
-// const typeRoutes = require('./routes/type');
-// const authorRoutes = require('./routes/author');
 const indexRoutes = require('./routes/user');
 const bookRoutes = require('./routes/book');
 
@@ -19,8 +16,6 @@ app.use(express.static('public'));
 
 // Routes Config:
 app.use('/user', indexRoutes);
-// app.use('/type', typeRoutes);d
-// app.use('/author', authorRoutes);
 app.use('/book', bookRoutes);
 
 const PORT = process.env.PORT || 8080;

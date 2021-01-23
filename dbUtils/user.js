@@ -68,42 +68,9 @@ const signIn = (params) => {
     
 }
 
-// const addBookToUser = (params => {
-//     return new Promise((resolve, reject) => {
-//         const { bookId, userId, status, rating, userComment } = params;
-//         db('user_book')
-//         .insert({
-//             user_id: userId,
-//             book_id: bookId,
-//             status: status,
-//             rating: rating,
-//             user_comment: userComment
-//         })
-//         .returning('*')
-//         .then(userBook => resolve(userBook))
-//         .catch(err => reject(err));
-//     })
-    
-
-// })
-
-// const getAllBooks = (params) => {
-//     return new Promise((resolve, reject) => {
-//         const { userId } = params;
-//         db.select('*')
-//         .from('v_user_book')
-//         .where('user_id', '=', userId)
-//         .then(userBooks => resolve(userBooks))
-//         .catch(err => reject(err))
-//     })
-    
-// }
-
 module.exports = {
     dbUser: {
         register: register,
         signIn: signIn,
-        // addBookToUser: addBookToUser,
-        // getAllBooks: getAllBooks  
     }
 }

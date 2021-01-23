@@ -29,6 +29,11 @@ router.post('/details', (req, res) => {
    .catch((err) =>res.status(500).json(err))
 })
 
+router.delete('/userBook', (req, res) => {
+   dbBook.deleteBookFromUser(req.body.userId, req.body.bookId)
+   .then(numberOfDeletedRows => res.status(200).json(numberOfDeletedRows))
+   .catch(err => res.status(500).json(err))
+})
 
 module.exports = router;
 

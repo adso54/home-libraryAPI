@@ -1,6 +1,4 @@
 const { db } = require('./config');
-const multer = require('multer')
-const {uploadImageIntoStore } = require('./firebaseUtils')
 
 const addBook = (req, res) => {
     return new Promise((resolve, reject) => {
@@ -280,11 +278,24 @@ const getAllUserBooks = (userId) => {
             )
         })
         .catch(err => reject(err))
+    })  
+}
+
+const deleteBookFromUser = (userId, bookId) => {
+    return new Promise((resolve, reject) =>{
+        db('book_user')
+            .where('user_id', userId)
+            .andWhere('book_id', bookId)
+            .del()
+        .then(numberOfDeletedRows => {
+            resolve(numberOfDeletedRows)
+        })
     })
 }
 
 module.exports = {dbBook:{
     addBook: addBook,
     getBook: getBook,
-    getAllUserBooks: getAllUserBooks
+    getAllUserBooks: getAllUserBooks,
+    deleteBookFromUser: deleteBookFromUser
 }}
