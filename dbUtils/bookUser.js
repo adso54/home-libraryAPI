@@ -29,10 +29,21 @@ const insertBookUser = async (bookId, userId, comments, readDate) => {
     }
 }
 
+const deleteBookUser = async (bookId, userId) => {
+    db('book_user')
+        .where('book_id', bookId)
+        .andWhere('user_id', userId)
+        .del()
+        .then((numberOfDeletedRows) => {
+            // console.log('User', numberOfDeletedRows)
+        })
+        .catch(err => console.log(err))
+}
 
 
 module.exports = {
     dbBookUser: {
-        insertBookUser: insertBookUser
+        insertBookUser: insertBookUser,
+        deleteBookUser: deleteBookUser
     }
 }

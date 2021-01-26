@@ -5,7 +5,51 @@ const { dbBookAuthor } = require('./bookAuthor');
 const { dbBookCategory } = require('./bookCategory');
 const { dbBookUser } = require('./bookUser');
 
-const addBook = (req, res) => {
+const checkIfBookExists = async (title) => {
+    const data = await db.select('id').from('book').where('title', '=', title);
+    if((typeof data[0] === 'undefined' || data[0] === null)){
+        return null;
+    }else{
+        return data[0].id;
+    }      
+}
+
+const insertBook = async (title, imageUrl, description) =>{
+    const createDate = new Date();
+
+    return await db('book')
+    .insert({
+        create_date: createDate,
+        title: title,
+        image_url: imageUrl,
+        description: description
+    })
+    .returning('id')
+    .then(bookId => {
+        bookId = JSON.parse(bookId);
+        return bookId
+    })
+}
+
+const updateBook = async (bookId, title, imageUrl, description) =>{
+    const createDate = new Date();
+
+    return await db('book')
+    .where('id', bookId)
+    .update({
+        create_date: createDate,
+        title: title,
+        image_url: imageUrl,
+        description: description
+    })
+    .returning('id')
+    .then(bookId => {
+        bookId = JSON.parse(bookId);
+        return bookId
+    })
+}
+
+const addOrEditBook = (req, res) => {
     return new Promise((resolve, reject) => {
         
         const authors= JSON.parse(req.body.authors);
@@ -15,6 +59,7 @@ const addBook = (req, res) => {
         const description = req.body.description;
         const comments = req.body.comments;
         const imageUrl = req.body.imageUrl;
+        const bookIdFromFront = req.body.bookId
         
         let readDate = null;
         if(req.body.readDate!=='null'){
@@ -22,20 +67,27 @@ const addBook = (req, res) => {
         }else{
             readDate = null;
         }
-        
-        const createDate = new Date();
                             
-        db('book')
-        .insert({
-            create_date: createDate,
-            title: title,
-            image_url: imageUrl,
-            description: description
-        })
-        .returning('id')
-        .then(createdBook => {
-            const bookId = JSON.parse(createdBook[0]);
+        checkIfBookExists(title)
+        .then(async bookId => {
+            if(bookId !== null || bookIdFromFront !== 'null'){
+                if(bookIdFromFront !== 'null'){
+                    bookId = bookIdFromFront
+                }
 
+                await dbBookAuthor.deleteBookAuthor(bookId)
+                await dbBookCategory.deleteBookCategory(bookId)
+                await dbBookUser.deleteBookUser(bookId, userId)
+                await updateBook(bookId, title, imageUrl, description)
+
+                return bookId
+                
+                
+            }else{
+                return await insertBook(title, imageUrl, description)
+            }
+        })
+        .then(bookId => {
             authors.forEach((author) => {
                 dbAuthor.checkIfAuthorExist(author).then(authorId => {
                     if(authorId !== null){
@@ -54,7 +106,7 @@ const addBook = (req, res) => {
                     if(categoryId !== null){
                         dbBookCategory.insertBookCategory(bookId, categoryId)
                     }else{
-                        dbCategory.insertCategory(category)
+                        dbCategory.insertCategory(category.category)
                             .then(categoryId => {
                                 dbBookCategory.insertBookCategory(bookId, categoryId)
                             })
@@ -63,7 +115,6 @@ const addBook = (req, res) => {
             })
 
             resolve (dbBookUser.insertBookUser(bookId, userId, comments, readDate))
-            
         })
         .catch(err=>reject(err))
     })
@@ -218,12 +269,14 @@ const deleteBookFromUser = (userId, bookId) => {
         .then(numberOfDeletedRows => {
             resolve(numberOfDeletedRows)
         })
+
     })
 }
 
 module.exports = {dbBook:{
-    addBook: addBook,
+    addOrEditBook: addOrEditBook,
     getBook: getBook,
     getAllUserBooks: getAllUserBooks,
-    deleteBookFromUser: deleteBookFromUser
+    deleteBookFromUser: deleteBookFromUser,
+    updateBook: updateBook
 }}

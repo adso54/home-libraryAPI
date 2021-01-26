@@ -16,8 +16,19 @@ const insertBookCategory = async (bookId, categoryId) => {
     })
 }
 
+const deleteBookCategory = async (bookId) => {
+    return await  db('book_category')
+        .where('book_id', bookId)
+        .del()
+        .then((numberOfDeletedRows) => {
+            // console.log('Category', numberOfDeletedRows)
+        })
+        .catch(err => console.log(err))
+    }
+
 module.exports = {
     dbBookCategory: {
-        insertBookCategory: insertBookCategory  
+        insertBookCategory: insertBookCategory,
+        deleteBookCategory: deleteBookCategory  
     }
 }

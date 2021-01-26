@@ -14,8 +14,19 @@ const insertBookAuthor = async (bookId, authorId) => {
     })
 }
 
+const deleteBookAuthor = async (bookId) => {
+    return await db('book_author')
+        .where('book_id', bookId)
+        .del()
+        .then((numberOfDeletedRows) => {
+            // console.log('Author', numberOfDeletedRows)
+        })
+        .catch(err => console.log(err))
+}
+
 module.exports = {
     dbBookAuthor: {
-        insertBookAuthor: insertBookAuthor
+        insertBookAuthor: insertBookAuthor,
+        deleteBookAuthor: deleteBookAuthor
     }
 }
