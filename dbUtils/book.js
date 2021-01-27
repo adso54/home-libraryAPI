@@ -70,11 +70,12 @@ const addOrEditBook = (req, res) => {
                             
         checkIfBookExists(title)
         .then(async bookId => {
-            if(bookId !== null || bookIdFromFront !== 'null'){
+            if(bookId !== 'undefined' && bookId !== null 
+                || bookIdFromFront !== 'undefined' && bookIdFromFront !== 'null'){
                 if(bookIdFromFront !== 'null'){
                     bookId = bookIdFromFront
                 }
-
+              
                 await dbBookAuthor.deleteBookAuthor(bookId)
                 await dbBookCategory.deleteBookCategory(bookId)
                 await dbBookUser.deleteBookUser(bookId, userId)
@@ -88,6 +89,7 @@ const addOrEditBook = (req, res) => {
             }
         })
         .then(bookId => {
+            
             authors.forEach((author) => {
                 dbAuthor.checkIfAuthorExist(author).then(authorId => {
                     if(authorId !== null){
