@@ -122,7 +122,6 @@ const addOrEditBook = (req, res) => {
     })
 }
 
-
 const getBook =(userId, bookId) => {
     return new Promise((resolve, reject) => {
         db.select('book.id', 'book.title', 'book.image_url', 'book.description' 
@@ -262,6 +261,17 @@ const getAllUserBooks = (userId) => {
     })  
 }
 
+const getTop10ByTitlePart = (titlePart) => {
+    return new Promise((resolve, reject) => {
+        db('book')
+            .where('title', 'like', '%' + titlePart + '%')
+            .limit(10)
+        .then(books => {
+            resolve(books);
+        })
+    })
+}
+
 const deleteBookFromUser = (userId, bookId) => {
     return new Promise((resolve, reject) =>{
         db('book_user')
@@ -275,10 +285,12 @@ const deleteBookFromUser = (userId, bookId) => {
     })
 }
 
+
 module.exports = {dbBook:{
     addOrEditBook: addOrEditBook,
     getBook: getBook,
     getAllUserBooks: getAllUserBooks,
     deleteBookFromUser: deleteBookFromUser,
-    updateBook: updateBook
+    updateBook: updateBook,
+    getTop10ByTitlePart: getTop10ByTitlePart
 }}

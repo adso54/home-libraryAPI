@@ -17,9 +17,11 @@ const insertAuthor = async (name) =>{
     .returning('id')
     .then(authorId => {
         authorId = JSON.parse(authorId);
+        
         return authorId
     })
 }
+
 
 
 module.exports = {
