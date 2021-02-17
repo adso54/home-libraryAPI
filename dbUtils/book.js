@@ -128,8 +128,11 @@ const getBook =(userId, bookId) => {
             ,'book_user.comments', 'book_user.read_date'
             )
                 .from('book')
-                .innerJoin('book_user', 'book.id', 'book_user.book_id')
-                .where('book_user.user_id' , '=' , userId)
+                .leftJoin('book_user', 'book.id', 'book_user.book_id')
+                .where(function() {
+                    this.where('book_user.user_id' , '=' , userId)
+                    .orWhere('book_user.user_id', null)
+                })
                 .andWhere('book.id' , '=' , bookId)
             .then(books => {
                 //Getting authors
@@ -188,7 +191,10 @@ const getBook =(userId, bookId) => {
                     })
                 )
             })
-            .catch(err => reject(err))
+            .catch(err => {
+                console.log(err)
+                reject(err)
+            })
         })
 }
 
@@ -284,7 +290,6 @@ const deleteBookFromUser = (userId, bookId) => {
 
     })
 }
-
 
 module.exports = {dbBook:{
     addOrEditBook: addOrEditBook,

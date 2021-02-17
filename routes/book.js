@@ -2,7 +2,6 @@ const express = require('express');
 const router = express.Router({mergeParams: true});
 const { dbBook}= require('../dbUtils/book');
 const multer = require('multer');
-const { db } = require('../dbUtils/config');
 var storage = multer.memoryStorage()
 var upload = multer({ storage: storage })
 
@@ -36,13 +35,10 @@ router.delete('/userBook', (req, res) => {
    .catch(err => res.status(500).json(err))
 })
 
-router.get('/getTop10ByTitlePart',(req, res)=>{
+router.post('/getTop10ByTitlePart',(req, res)=>{
    dbBook.getTop10ByTitlePart(req.body.title)
    .then((books) => res.status(200).json(books))
    .catch((err) =>res.status(500).json(err))
 })
 
 module.exports = router;
-
-
-
