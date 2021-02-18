@@ -51,7 +51,7 @@ const updateBook = async (bookId, title, imageUrl, description) =>{
 
 const addOrEditBook = (req, res) => {
     return new Promise((resolve, reject) => {
-        
+        console.log(req.body)
         const authors= JSON.parse(req.body.authors);
         const categories = JSON.parse(req.body.categories);
         const title = req.body.title;
@@ -125,7 +125,7 @@ const addOrEditBook = (req, res) => {
 const getBook =(userId, bookId) => {
     return new Promise((resolve, reject) => {
         db.select('book.id', 'book.title', 'book.image_url', 'book.description' 
-            ,'book_user.comments', 'book_user.read_date'
+            ,'book_user.comments', 'book_user.read_date', 'book_user.user_id'
             )
                 .from('book')
                 .leftJoin('book_user', 'book.id', 'book_user.book_id')
