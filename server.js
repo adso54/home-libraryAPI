@@ -6,6 +6,7 @@ require('dotenv').config();
 // Importing routers
 const indexRoutes = require('./routes/user');
 const bookRoutes = require('./routes/book');
+const authorRoutes = require('./routes/author');
 
 // App config
 const app = express();
@@ -17,6 +18,7 @@ app.use(express.static('public'));
 // Routes Config:
 app.use('/user', indexRoutes);
 app.use('/book', bookRoutes);
+app.use('/author', authorRoutes);
 
 const PORT = process.env.PORT || 8080;
 

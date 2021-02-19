@@ -22,12 +22,22 @@ const insertAuthor = async (name) =>{
     })
 }
 
-
+const getTop10ByNamePart = (namePart) => {
+    return new Promise((resolve, reject) => {
+        db('author')
+            .where('name', 'like', '%' + namePart + '%')
+            .limit(10)
+        .then(authors => {
+            resolve(authors);
+        })
+    })
+}
 
 module.exports = {
     dbAuthor: {
         checkIfAuthorExist: checkIfAuthorExist,
-        insertAuthor: insertAuthor
+        insertAuthor: insertAuthor,
+        getTop10ByNamePart: getTop10ByNamePart
        
     }
 }
