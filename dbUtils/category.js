@@ -21,10 +21,22 @@ const insertCategory = async (category) =>{
     })
 }
 
+const getTop10ByCategoryPart = (categoryPart) => {
+    return new Promise((resolve, reject) => {
+        db('category')
+            .where('category', 'like', '%' + categoryPart + '%')
+            .limit(10)
+        .then(categories => {
+            resolve(categories);
+        })
+    })
+}
+
 module.exports = {
     dbCategory: {
         checkIfCategoryExist: checkIfCategoryExist,
         insertCategory: insertCategory,
+        getTop10ByCategoryPart: getTop10ByCategoryPart
        
     }
 }

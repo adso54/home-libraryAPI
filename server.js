@@ -7,6 +7,7 @@ require('dotenv').config();
 const indexRoutes = require('./routes/user');
 const bookRoutes = require('./routes/book');
 const authorRoutes = require('./routes/author');
+const categoryRoutes = require('./routes/category');
 
 // App config
 const app = express();
@@ -19,6 +20,7 @@ app.use(express.static('public'));
 app.use('/user', indexRoutes);
 app.use('/book', bookRoutes);
 app.use('/author', authorRoutes);
+app.use('/category', categoryRoutes);
 
 const PORT = process.env.PORT || 8080;
 
