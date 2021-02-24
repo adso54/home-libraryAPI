@@ -51,7 +51,6 @@ const updateBook = async (bookId, title, imageUrl, description) =>{
 
 const addOrEditBook = (req, res) => {
     return new Promise((resolve, reject) => {
-        console.log(req.body)
         const authors= JSON.parse(req.body.authors);
         const categories = JSON.parse(req.body.categories);
         const title = req.body.title;
@@ -88,8 +87,7 @@ const addOrEditBook = (req, res) => {
                 return await insertBook(title, imageUrl, description)
             }
         })
-        .then(bookId => {
-            
+        .then(bookId => { 
             authors.forEach((author) => {
                 dbAuthor.checkIfAuthorExist(author).then(authorId => {
                     if(authorId !== null){

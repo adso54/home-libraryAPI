@@ -1,7 +1,7 @@
 const { db } = require('./config');
 
 const checkIfCategoryExist = async (category) =>{
-    const data = await db.select('id').from('category').where('category', '=', category);
+    const data = await db.select('id').from('category').where('category', '=', category.category);
     if((typeof data[0] === 'undefined' || data[0] === null)){
         return null;
     }else{
