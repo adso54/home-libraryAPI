@@ -2,6 +2,8 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 require('dotenv').config();
+const {sendEmailText } = require('./email.config')
+
 
 // Importing routers
 const indexRoutes = require('./routes/user');
@@ -28,3 +30,5 @@ app.listen(PORT, () => {
     console.log(`Our app is running on port ${ PORT }`);
 });
 
+
+sendEmailText('kamil.danielski@gmail.com', 'Tytuł', 'Treść maila')
