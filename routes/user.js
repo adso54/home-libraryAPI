@@ -16,4 +16,11 @@ router.post('/signIn', (req,res) => {
     .catch(err=>res.status(500).json(err))
 })
 
+router.post('/passwordReset', (req, res) => {
+    dbUser.resetPassword(req.body)
+    .then(token=> {
+        res.status(200).json(token)
+    })
+})
+
 module.exports = router;

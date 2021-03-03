@@ -1,5 +1,6 @@
 const { db } = require('./config');
 const bcrypt = require('bcrypt');
+const {tokenDecode, tokenGenerate} = require('../utils/jwt')
 
 const register = (params) =>{
     return new Promise((resolve, reject) =>{
@@ -68,9 +69,27 @@ const signIn = (params) => {
     
 }
 
+const resetPassword = (params) => {
+    return new Promise((resolve, reject) => {
+        const {email} = params;
+        const token = tokenGenerate(email)
+        
+        const checkUserId = (email) => {
+            return db.select('id')
+                .from('user')
+                .where('email',email)
+                .then(data => data[0])
+        }
+
+
+        resolve(token)
+    })
+}
+
 module.exports = {
     dbUser: {
         register: register,
         signIn: signIn,
+        resetPassword: resetPassword
     }
 }
