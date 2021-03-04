@@ -72,17 +72,92 @@ const signIn = (params) => {
 const resetPassword = (params) => {
     return new Promise((resolve, reject) => {
         const {email} = params;
-        const token = tokenGenerate(email)
         
-        const checkUserId = (email) => {
-            return db.select('id')
+        
+        const getUserId = (email) => {
+            return new Promise((resolve, reject) => {
+                db.select('id')
                 .from('user')
                 .where('email',email)
-                .then(data => data[0])
+                .then(data => resolve(data[0]))
+            })      
         }
 
+        const getUserToken = (userId) => {
+            return new Promise((resolve, reject) => {
+                db.select('modify_date','use_counter', 'active', 'token')
+                   .from('user_token')
+                   .where('user_id',userId)
+                   .andWhere('active',1)
+                   .then(data => resolve(data[0]))
+            })
+        }
 
-        resolve(token)
+        const insertUserToken = (userId, token) => {
+            return new Promise((resolve, reject) => {
+                db.insert({
+                   user_id: userId,
+                   token: token,
+                   create_date: new Date(),
+                   modify_date: new Date(), 
+                   use_counter: 0,
+                   active: 1
+               })
+               .into('user_token')
+               .returning('*')
+               .then(data => resolve(data))
+            })
+        }
+
+        const unactivateToken = (token) => {
+            return new Promise((resolve, reject) =>{
+                db('user_token')
+                .update({
+                    active: 0
+                })
+                .where('token', token)
+                .returning('user_id')
+                .then(userId => resolve(userId))
+            })
+        }
+
+        const addUseCounterForToken = (token, useCounter) => {
+            return new Promise((resolve, reject) =>{
+                db('user_token')
+                .update({
+                    use_counter: useCounter
+                })
+                .where('token', token)
+                .returning('user_id')
+                .then(userId => resolve(userId))
+            })
+        }
+
+        getUserId(email)
+        .then(data => {
+            const userId = data.id;
+
+            getUserToken(userId)
+            .then(tokenData => {
+                if(tokenData === undefined) {
+                    const token = tokenGenerate(email);
+
+                    insertUserToken(userId, token)
+                    .then(userToken => resolve(userToken))
+
+                }else{
+                    // const { token,  active} = tokenData[0];
+                    // const useCounter = tokenData[0].use_counter
+
+                    // addUseCounterForToken(token, useCounter + 1)
+                    // .then(data => resolve(data))
+                    resolve(tokenData)
+
+                }
+            })
+
+        })
+
     })
 }
 
