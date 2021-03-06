@@ -2,6 +2,7 @@ const { db } = require('./config');
 const bcrypt = require('bcrypt');
 const {tokenDecode, tokenGenerate} = require('../utils/jwt')
 
+
 const register = (params) =>{
     return new Promise((resolve, reject) =>{
 
@@ -73,7 +74,6 @@ const resetPassword = (params) => {
     return new Promise((resolve, reject) => {
         const {email} = params;
         
-        
         const getUserId = (email) => {
             return new Promise((resolve, reject) => {
                 db.select('id')
@@ -93,7 +93,7 @@ const resetPassword = (params) => {
             })
         }
 
-        const insertUserToken = (userId, token) => {
+        const insertUserToken = (userId, token, secret) => {
             return new Promise((resolve, reject) => {
                 db.insert({
                    user_id: userId,
@@ -101,7 +101,8 @@ const resetPassword = (params) => {
                    create_date: new Date(),
                    modify_date: new Date(), 
                    use_counter: 0,
-                   active: 1
+                   active: 1,
+                   secret: secret
                })
                .into('user_token')
                .returning('*')
@@ -116,8 +117,8 @@ const resetPassword = (params) => {
                     active: 0
                 })
                 .where('token', token)
-                .returning('user_id')
-                .then(userId => resolve(userId))
+                .returning('*')
+                .then(tokenData => resolve(tokenData))
             })
         }
 
@@ -128,11 +129,12 @@ const resetPassword = (params) => {
                     use_counter: useCounter
                 })
                 .where('token', token)
-                .returning('user_id')
-                .then(userId => resolve(userId))
+                .returning('*')
+                .then(tokenData => resolve(tokenData))
             })
         }
 
+        // Flow of the password reset method
         getUserId(email)
         .then(data => {
             const userId = data.id;
@@ -140,18 +142,21 @@ const resetPassword = (params) => {
             getUserToken(userId)
             .then(tokenData => {
                 if(tokenData === undefined) {
-                    const token = tokenGenerate(email);
+                    const {token, secret} = tokenGenerate(email);
 
-                    insertUserToken(userId, token)
+                    insertUserToken(userId, token, secret)
                     .then(userToken => resolve(userToken))
-
                 }else{
-                    // const { token,  active} = tokenData[0];
-                    // const useCounter = tokenData[0].use_counter
+                    const { token,  active} = tokenData;
+                    const useCounter = tokenData.use_counter
 
-                    // addUseCounterForToken(token, useCounter + 1)
-                    // .then(data => resolve(data))
-                    resolve(tokenData)
+                    addUseCounterForToken(token, useCounter + 1)
+                    .then(tokenData => {
+                        if(useCounter >= 3){
+                            unactivateToken(tokenData[0].token)
+                        }
+                        resolve(tokenData[0])
+                    })
 
                 }
             })

@@ -1,11 +1,17 @@
-var jwt = require('jwt-simple');
+const jwt = require('jwt-simple');
+const UIDGenerator = require('uid-generator')
+const uidgen = new UIDGenerator();
 
-const tokenGenerate = (payload) => (
-    jwt.encode(payload, process.env.JWT_SECRET)
-)
+const tokenGenerate = (payload) => {
+    const secret = uidgen.generateSync();
+    return {
+        token: jwt.encode(payload,secret),
+        secret: secret
+    }
+}
 
-const tokenDecode = (token) => (
-    jwt.decode(token, process.env.JWT_SECRET)
+const tokenDecode = (token, secret) => (
+    jwt.decode(token, secret)
 )
 
 module.exports = {
