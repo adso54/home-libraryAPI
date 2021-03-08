@@ -1,6 +1,7 @@
 const { db } = require('./config');
 const bcrypt = require('bcrypt');
 const {tokenDecode, tokenGenerate} = require('../utils/jwt')
+const {sendEmailText} = require('../utils/email')
 
 
 const register = (params) =>{
@@ -72,7 +73,7 @@ const signIn = (params) => {
 
 const resetPassword = (params) => {
     return new Promise((resolve, reject) => {
-        const {email} = params;
+        const {email, appLink} = params;
         
         const getUserId = (email) => {
             return new Promise((resolve, reject) => {
@@ -145,7 +146,12 @@ const resetPassword = (params) => {
                     const {token, secret} = tokenGenerate(email);
 
                     insertUserToken(userId, token, secret)
-                    .then(userToken => resolve(userToken))
+                    .then(userToken => {
+                        sendEmailText(email, "Password reset link", `Click link to reset password:
+                        ${appLink + userToken[0].token}
+                        `)
+                        resolve(userToken[0].token)
+                    })
                 }else{
                     const { token,  active} = tokenData;
                     const useCounter = tokenData.use_counter
@@ -155,7 +161,10 @@ const resetPassword = (params) => {
                         if(useCounter >= 3){
                             unactivateToken(tokenData[0].token)
                         }
-                        resolve(tokenData[0])
+                        sendEmailText(email, "Password reset link", `Click link to reset password:
+                        ${appLink + tokenData[0].token}
+                        `)
+                        resolve(tokenData[0].token)
                     })
 
                 }
