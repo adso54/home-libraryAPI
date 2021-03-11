@@ -175,10 +175,47 @@ const resetPassword = (params) => {
     })
 }
 
+const changePassword = (params) => {
+    return new Promise((resolve, reject) => {
+        console.log('in')
+        const {password, token} = params;
+        const salt = bcrypt.genSaltSync(10);
+        const hash = bcrypt.hashSync(password, salt);
+        console.log( password)
+        console.log('Hash:', hash)
+        db.select('secret').from('user_token').where('token', token)
+        .then(data => {
+            const secret = data[0].secret
+            console.log('secret:', secret)
+            const email = tokenDecode(token, secret)
+            console.log('email:', email)
+            db.select('id').from('user').where('email', email)
+            .then(data => {
+                const userId = data[0].id
+                console.log('UserId:', userId)
+                db('user_login').update({ 
+                    password: hash
+                })
+                .where('user_id', userId)
+                .returning('user_id')
+                .then(data => {
+                    db('user_token')
+                    .where('token', token)
+                    .del()
+
+                    resolve(data[0])})
+            })
+
+        })
+
+    })
+}
+
 module.exports = {
     dbUser: {
         register: register,
         signIn: signIn,
-        resetPassword: resetPassword
+        resetPassword: resetPassword,
+        changePassword: changePassword
     }
 }

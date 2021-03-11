@@ -23,4 +23,13 @@ router.post('/passwordReset', (req, res) => {
     })
 })
 
+router.post('/changePassword', (req, res) => {
+    console.log('go')
+    dbUser.changePassword(req.body)
+    .then((userId) => {
+        res.status(200).json(userId)
+    })
+    .catch(err=> res.status(500).json(err))
+})
+
 module.exports = router;
