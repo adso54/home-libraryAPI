@@ -177,22 +177,16 @@ const resetPassword = (params) => {
 
 const changePassword = (params) => {
     return new Promise((resolve, reject) => {
-        console.log('in')
         const {password, token} = params;
         const salt = bcrypt.genSaltSync(10);
         const hash = bcrypt.hashSync(password, salt);
-        console.log( password)
-        console.log('Hash:', hash)
         db.select('secret').from('user_token').where('token', token)
         .then(data => {
             const secret = data[0].secret
-            console.log('secret:', secret)
             const email = tokenDecode(token, secret)
-            console.log('email:', email)
             db.select('id').from('user').where('email', email)
             .then(data => {
                 const userId = data[0].id
-                console.log('UserId:', userId)
                 db('user_login').update({ 
                     password: hash
                 })
@@ -202,8 +196,11 @@ const changePassword = (params) => {
                     db('user_token')
                     .where('token', token)
                     .del()
+                    .then(() => {
+                        resolve(data[0])
+                    })
 
-                    resolve(data[0])})
+                })
             })
 
         })
