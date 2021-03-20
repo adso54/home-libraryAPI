@@ -270,6 +270,7 @@ const getTop10ByTitlePart = (titlePart) => {
         db('book')
             .where('title', 'like', '%' + titlePart + '%')
             .limit(10)
+            .orderBy('title')
         .then(books => {
             resolve(books);
         })

@@ -27,6 +27,7 @@ const getTop10ByNamePart = (namePart) => {
         db('author')
             .where('name', 'like', '%' + namePart + '%')
             .limit(10)
+            .orderBy('name')
         .then(authors => {
             resolve(authors);
         })

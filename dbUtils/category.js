@@ -26,6 +26,7 @@ const getTop10ByCategoryPart = (categoryPart) => {
         db('category')
             .where('category', 'like', '%' + categoryPart + '%')
             .limit(10)
+            .orderBy('category')
         .then(categories => {
             resolve(categories);
         })
